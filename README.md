@@ -1,7 +1,14 @@
-# Cadastro de Usuários (Frontend)
+<h1 align="center">Cadastro de Usuários (Frontend) 👥</h1>
 
-Projeto de estudo em **React + Vite** para cadastrar, listar e excluir usuários, consumindo uma API REST.
-O README segue a ordem do curso: cada seção explica o conceito e mostra onde ele aparece no código.
+<p align="center">
+  Projeto de estudo em <b>React + Vite</b> para cadastrar, listar e excluir usuários, consumindo uma API REST.<br />
+  O README segue a ordem do curso: cada seção explica o conceito e mostra onde ele aparece no código.
+</p>
+
+<p align="center">
+  <img width="48%" alt="Tela de cadastro" src="https://github.com/user-attachments/assets/2b34cd18-41c6-4241-9999-3983812b002a" />
+  <img width="48%" alt="Tela de listagem" src="https://github.com/user-attachments/assets/2031b1a1-c128-40a2-bbe3-cc933b137aec" />
+</p>
 
 ## Funcionalidades
 
