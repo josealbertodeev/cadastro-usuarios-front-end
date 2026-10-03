@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 export const Button = styled.button`
-    border: none;
-    background: linear-gradient(180deg, #FE7E5D 0%, #FF6378 100%);
+    border: ${(props)=> props.tema === "primario" ? "none" : "1px solid #fff"};
+    background: ${(props)=> props.tema === "primario" ? "linear-gradient(180deg, #FE7E5D 0%, #FF6378 100%)" : "transparent"};
     font-size: 16px;
     color: #fff;
     padding: 16px 32px;
@@ -16,5 +16,9 @@ export const Button = styled.button`
 
     &:active {
         opacity: 0.6;
+    }
+
+      @media (max-width: 750px){
+        margin-top: 20px;
     }
 `
