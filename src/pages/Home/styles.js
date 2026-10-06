@@ -37,6 +37,13 @@ export const Input = styled.input`
     width: 100%;
 `
 
+export const ErrorMessage = styled.p`
+    color: #ff6b6b;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+`
+
 export const InputLabel = styled.label`
     color: #fff;
     font-size: 12px;
