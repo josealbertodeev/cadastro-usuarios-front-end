@@ -6,6 +6,16 @@
 </p>
 
 <p align="center">
+  <a href="https://josealbertodeev.github.io/cadastro-usuarios-front-end/"><b>Ver aplicação online</b></a>
+  ·
+  <a href="https://api-cadastro-usuario-backend.onrender.com/usuarios">API em produção</a>
+  ·
+  <a href="https://github.com/josealbertodeev/api-cadastro-usuario-backend">Repositório do back-end</a>
+</p>
+
+> A API está no plano gratuito do Render, que desliga o servidor após alguns minutos sem uso. Se a lista demorar para carregar no primeiro acesso, aguarde de 30 a 60 segundos.
+
+<p align="center">
   <img width="48%" alt="Tela de cadastro" src="https://github.com/user-attachments/assets/2b34cd18-41c6-4241-9999-3983812b002a" />
   <img width="48%" alt="Tela de listagem" src="https://github.com/user-attachments/assets/2031b1a1-c128-40a2-bbe3-cc933b137aec" />
 </p>
@@ -23,7 +33,28 @@ yarn            # instala as dependências (ou: npm install)
 yarn dev        # inicia o Vite em modo desenvolvimento
 ```
 
-O frontend espera uma API em `http://localhost:3000` com as rotas `GET /usuarios`, `POST /usuarios` e `DELETE /usuarios/:id`. Ela precisa estar rodando para o app funcionar (veja [CORS](#16---cors)).
+O frontend consome a [API de usuários](https://github.com/josealbertodeev/api-cadastro-usuario-backend) pelas rotas `GET /usuarios`, `POST /usuarios` e `DELETE /usuarios/:id`. A URL da API vem da variável de ambiente `VITE_API_URL`:
+
+- **Sem a variável**: usa `http://localhost:3000`, então basta rodar o back-end localmente.
+- **Apontando para a API em produção**: crie um arquivo `.env` na raiz, usando o `.env.example` como modelo:
+
+  ```env
+  VITE_API_URL="https://api-cadastro-usuario-backend.onrender.com"
+  ```
+
+## Arquitetura e deploy
+
+```
+Navegador ──► GitHub Pages (este front) ──► Render (API Express + Prisma) ──► MongoDB Atlas
+```
+
+- **Front-end**: publicado no GitHub Pages por um workflow do GitHub Actions ([deploy.yml](.github/workflows/deploy.yml)) a cada push na `main`.
+- **Back-end**: hospedado no Render, com redeploy automático a cada push na `main` do repositório da API.
+- **Banco de dados**: MongoDB Atlas.
+
+A URL da API fica em uma variável do repositório (**Settings → Secrets and variables → Actions → Variables**) chamada `VITE_API_URL`. O workflow a repassa para o `npm run build`.
+
+Isso é necessário porque o Vite **substitui** `import.meta.env.VITE_API_URL` pelo valor real durante o build. O resultado é um JavaScript estático, que não lê variáveis depois de publicado. Por isso a variável precisa existir antes do build, e mudar a URL exige rodar o workflow de novo.
 
 ## Tecnologias
 
@@ -171,9 +202,11 @@ Usamos o **axios** para fazer requisições HTTP. Criamos uma instância com a U
 
 ```js
 const api = axios.create({
-    baseURL: "http://localhost:3000"
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000"
 })
 ```
+
+A URL vem de uma variável de ambiente. Assim, o mesmo código funciona localmente e em produção, sem alterações (veja [Arquitetura e deploy](#arquitetura-e-deploy)).
 
 Os métodos seguem os verbos HTTP:
 
@@ -204,6 +237,8 @@ async function registerNewUser() {
 
 A correção é feita **no backend**, habilitando o CORS (por exemplo, com o pacote `cors` no Express). Se você vir o erro `blocked by CORS policy` no console, o problema está na configuração da API, não no React.
 
+Em produção acontece o mesmo: o site está em `https://josealbertodeev.github.io` e a API no Render, que são origens diferentes. Por isso a API libera apenas essa origem, configurada na variável `CORS_ORIGIN` do servidor.
+
 ## 17 e 22 - Rotas e React Router
 
 Rotas fazem cada **URL mostrar uma tela diferente**, sem recarregar a página (SPA, Single Page Application).
@@ -211,11 +246,17 @@ Rotas fazem cada **URL mostrar uma tela diferente**, sem recarregar a página (S
 Em [src/routes.jsx](src/routes.jsx):
 
 ```jsx
-const router = createBrowserRouter([
+const router = createHashRouter([
     { path: "/",                  element: <Home /> },
     { path: "/Lista-de-usuarios", element: <ListUsers /> }
 ])
 ```
+
+**Por que `createHashRouter` e não `createBrowserRouter`?** O GitHub Pages só serve arquivos estáticos. Com o `createBrowserRouter`, a URL fica `.../Lista-de-usuarios`. Se alguém abre esse link direto ou recarrega a página, o servidor procura um arquivo com esse nome, não encontra e responde 404.
+
+Com o `createHashRouter`, a URL fica `.../#/Lista-de-usuarios`. Tudo depois do `#` não é enviado ao servidor, que sempre entrega o `index.html`. A partir daí, o React Router lê o trecho depois do `#` e mostra a tela certa.
+
+Em hospedagens que permitem redirecionar todas as rotas para o `index.html` (Vercel e Netlify, por exemplo), o `createBrowserRouter` funciona e gera URLs mais limpas.
 
 No `main.jsx` o router é entregue ao app com `<RouterProvider router={router} />`.
 
